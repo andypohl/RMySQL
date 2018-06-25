@@ -28,6 +28,12 @@ if [ "$INCLUDE_DIR" ] || [ "$LIB_DIR" ]; then
   echo "Found INCLUDE_DIR and/or LIB_DIR!"
   PKG_CFLAGS="-I$INCLUDE_DIR $PKG_CFLAGS"
   PKG_LIBS="-L$LIB_DIR $PKG_LIBS"
+# Workaround for Centos7 with source Connector/C
+# (not autodetected, you have to opt-in with --configure-vars='ADD_RPATH=1')
+elif [ "$ADD_RPATH" ]; then
+  RPATH=$(mariadb_config --libs | sed 's/\s.*$//;s/-L//')
+  PKG_CFLAGS=${PKGCONFIG_CFLAGS}
+  PKG_LIBS="-Wl,-rpath,$RPATH $PKGCONFIG_LIBS"
 elif [ "$PKGCONFIG_CFLAGS" ] || [ "$PKGCONFIG_LIBS" ]; then
   echo "Found mysql_config cflags and libs!"
   PKG_CFLAGS=${PKGCONFIG_CFLAGS}
